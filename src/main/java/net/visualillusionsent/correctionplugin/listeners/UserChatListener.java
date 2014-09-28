@@ -2,6 +2,7 @@ package net.visualillusionsent.correctionplugin.listeners;
 
 import net.visualillusionsent.correctionplugin.Message;
 import net.visualillusionsent.correctionplugin.MessageManager;
+import net.visualillusionsent.correctionplugin.StringUtils;
 import net.visualillusionsent.vibotx.api.events.EventListener;
 import net.visualillusionsent.vibotx.api.events.EventMethod;
 import org.pircbotx.hooks.events.MessageEvent;
@@ -35,8 +36,8 @@ public class UserChatListener implements EventListener {
         String replacer = params.length > 2 ? params[2] : "";
         String flags = params.length > 3 ? params[3] : "";
         /* calculate a few flags for later */
-        boolean ignorecase = StringUtils.containsString(flags, "i", true);
-        boolean replaceAll = StringUtils.containsString(flags, "g", true);
+        boolean ignorecase = flags.isEmpty() ? false : StringUtils.containsString(flags, "i", true);
+        boolean replaceAll = flags.isEmpty() ? false : StringUtils.containsString(flags, "g", true);
         /* select our message */
         last = getLastMessage(MessageManager.getMessages(event.getChannel().getName()), substring, ignorecase);
         /* no message? return! */

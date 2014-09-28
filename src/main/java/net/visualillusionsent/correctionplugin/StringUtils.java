@@ -1,4 +1,4 @@
-package net.visualillusionsent.correctionplugin.listeners;
+package net.visualillusionsent.correctionplugin;
 
 import net.visualillusionsent.utils.ArrayUtils;
 
@@ -47,12 +47,24 @@ public class StringUtils {
      */
     public static String replaceAll(String string, String substring, String replacer, boolean ignoreCase) {
         int[] indices = containsStringIndices(string, substring, ignoreCase);
-        String toRet = new String(string);
-        while (indices.length > 0) {
+        //String toRet = new String(string);
+        /*while (indices.length > 0) {
             toRet = replaceFirst(toRet, substring, replacer, ignoreCase);
             indices = containsStringIndices(toRet, substring, ignoreCase);
+        }*/
+        StringBuilder sb = new StringBuilder();
+        mainLoop:
+        for (int i = 0; i < string.length(); i++) {
+            for (int index : indices) {
+                if (i == index) {
+                    i = (index + substring.length() - 1);
+                    sb.append(replacer);
+                    continue mainLoop;
+                }
+            }
+            sb.append(string.charAt(i));
         }
-        return toRet;
+        return sb.toString();
     }
 
     /**
@@ -115,22 +127,22 @@ public class StringUtils {
     public static int[] containsStringIndices(String string, String substring, boolean ignoreCase) {
         LinkedList<Integer> matches = new LinkedList<Integer>();
         /* make sure we have good strings */
-        if (string == null || substring == null)
-            return ArrayUtils.toPrimative(matches.toArray(new Integer[matches.size()]));
+        if (string == null) throw new IllegalArgumentException("String cannot be null.");
+        if (substring == null) throw new IllegalArgumentException("Substring cannot be null.");
         if (substring.isEmpty()) throw new IllegalArgumentException("Substring cannot be empty.");
-        if (string.isEmpty()) return ArrayUtils.toPrimative(matches.toArray(new Integer[matches.size()]));
+        if (string.isEmpty())  throw new IllegalArgumentException("String cannot be empty.");
 
         /* Convert out strings to iterators */
         LinkedList<Character> chList = getCharList(string);
         LinkedList<Character> subchList = getCharList(new String(substring));
         /* Declare some variables, get our first substring character */
-        int chI = 0;
-        int subchI = 0;
-        /* marker points for indices */
-        int chIMarker = 0;
+        int chIndex = 0;
+        int subchIndex = 0;
+        /* marker points for indices; denotes the starting index of our current check */
+        int chIndexMarker = 0;
         /* current chars */
-        char ch = chList.get(chI);
-        char subch = subchList.get(subchI);
+        char ch = chList.get(chIndex);
+        char subch = subchList.get(subchIndex);
         int matching = 0;
         do {
             boolean equals = false;
@@ -160,32 +172,34 @@ public class StringUtils {
                 matching++;
                 if (substring.length() == matching) {
                     /* We have a matchin string! Reset our values! */
-                    subchI = 0;
+                    subchIndex = 0;
                     matching = 0;
-                    matches.add(chIMarker);
-                    chIMarker = ++chI;
+                    /* Add it to our list of indices */
+                    matches.add(chIndexMarker);
+                    chIndexMarker = ++chIndex;
                 } else {
-                    chI++;
-                    subchI++;
+                    chIndex++;
+                    subchIndex++;
                 }
                 /* set our char variables for next iteration */
-                if (chList.size() <= chI) {
+                if (chList.size() <= chIndex) {
                     ch = 0;
                 } else {
-                    ch = chList.get(chI);
+                    ch = chList.get(chIndex);
                 }
-                subch = subchList.get(subchI);
+                subch = subchList.get(subchIndex);
             } else {
                 /* no match, reset substring */
                 matching = 0;
-                chI = chIMarker += 1;
-                if (chList.size() <= chI) {
+                chIndex = chIndexMarker += 1;
+                /* check if we have any more characters to compare */
+                if (chList.size() <= chIndex) {
                     ch = 0;
                 } else {
-                    ch = chList.get(chI);
+                    ch = chList.get(chIndex);
                 }
-                subchI = 0;
-                subch = subchList.get(subchI);
+                subchIndex = 0;
+                subch = subchList.get(subchIndex);
             }
 
 
