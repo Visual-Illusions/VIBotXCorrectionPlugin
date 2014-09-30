@@ -39,7 +39,12 @@ public class UserChatListener implements EventListener {
         boolean ignorecase = flags.isEmpty() ? false : StringUtils.containsString(flags, "i", true);
         boolean replaceAll = flags.isEmpty() ? false : StringUtils.containsString(flags, "g", true);
         /* select our message */
-        last = getLastMessage(MessageManager.getMessages(event.getChannel().getName()), substring, ignorecase);
+        List<Message> messages = MessageManager.getMessages(event.getChannel().getName());
+        /* if null, no messages sent in this channel have been tracked. return */
+        if (messages == null) {
+            return;
+        }
+        last = getLastMessage(messages, substring, ignorecase);
         /* no message? return! */
         if (last == null) {
             return;
